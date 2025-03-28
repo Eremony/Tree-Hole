@@ -38,7 +38,7 @@
     const db = firebase.database();
 
     function checkPassword() {
-      const password = document.getElementById('passwordInput').value;
+      const password = document.querySelector('#passwordInput').value;
       if (password === 'Eremony') {
         document.getElementById('passwordPrompt').style.display = 'none';
         document.getElementById('chatContainer').style.display = 'block';
@@ -49,11 +49,18 @@
     }
 
     function sendMessage() {
-      const messageInput = document.getElementById('messageInput');
+      const messageInput = document.querySelector('#messageInput');
       const messageText = messageInput.value.trim();
       if (messageText) {
         const timestamp = new Date().toLocaleString();
-        db.ref('messages').push({ text: messageText, time: timestamp });
+        db.ref('messages').push({ text: messageText, time: timestamp }, (error) => {
+          if (error) {
+            console.error('消息发送失败：', error);
+            alert('消息发送失败，请检查数据库权限。');
+          } else {
+            console.log('消息发送成功');
+          }
+        });
         messageInput.value = '';
       }
     }
@@ -61,10 +68,14 @@
     function loadMessages() {
       const messagesList = document.getElementById('messages');
       db.ref('messages').on('child_added', (snapshot) => {
-        const data = snapshot.val();
-        const messageItem = document.createElement('li');
-        messageItem.innerHTML = `${data.text} <span class="timestamp">${data.time}</span>`;
-        messagesList.appendChild(messageItem);
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          const messageItem = document.createElement('li');
+          messageItem.innerHTML = `${data.text} <span class="timestamp">${data.time}</span>`;
+          messagesList.appendChild(messageItem);
+        } else {
+          console.error('Snapshot does not exist');
+        }
       });
     }
   </script>
