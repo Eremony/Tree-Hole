@@ -1,16 +1,67 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <!-- 保持原有 head 部分不变 -->
-    <!-- 新增 Firebase SDK 引入 -->
-    <script src="https://www.gstatic.com/firebasejs/10.5.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.5.2/firebase-database-compat.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eremony的聊天树洞</title>
+    <style>
+        /* 保持原有样式不变 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        #messages {
+            list-style-type: none;
+            padding: 0;
+        }
+        #messages li {
+            padding: 8px;
+            margin-bottom: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        #chatbox {
+            display: flex;
+            margin-top: 20px;
+        }
+        #chatbox input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        #chatbox button {
+            padding: 10px 20px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #28a745;
+            color: white;
+        }
+    </style>
 </head>
 <body>
-    <!-- 保持原有 body 结构不变 -->
+    <h1>Eremony的聊天树洞</h1>
+    <ul id="messages"></ul>
+    <div id="chatbox">
+        <input id="messageInput" type="text" placeholder="输入你的留言...">
+        <button onclick="sendMessage()">发送</button>
+    </div>
 
-    <script>
-        // 初始化 Firebase
+    <!-- 使用新版模块化 Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-app.js";
+        import { 
+            getDatabase, 
+            ref, 
+            push, 
+            onChildAdded 
+        } from "https://www.gstatic.com/firebasejs/10.5.2/firebase-database.js";
+
+        // Firebase 配置
         const firebaseConfig = {
             apiKey: "AIzaSyCFfgJbKzj4yRmL0o4WhRopdEpixV8va3U",
             authDomain: "eremonychat.firebaseapp.com",
@@ -21,39 +72,43 @@
             appId: "1:989460520204:web:341028ab6e4375609afd29",
             measurementId: "G-S34034MY91"
         };
-        const app = firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
 
-        // 监听数据库变化
-        const messagesRef = database.ref('messages');
-        messagesRef.on('child_added', (snapshot) => {
+        // 初始化 Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const messagesRef = ref(database, 'messages');
+
+        // 监听实时消息
+        onChildAdded(messagesRef, (snapshot) => {
             const message = snapshot.val();
             addMessageToPage(message.text, message.timestamp);
         });
 
-        // 发送消息到 Firebase
-        function sendMessage() {
+        // 将函数挂载到 window 对象
+        window.sendMessage = function() {
             const messageInput = document.getElementById('messageInput');
             const messageText = messageInput.value.trim();
             
             if (messageText) {
-                // 推送消息到数据库
-                messagesRef.push({
+                push(messagesRef, {
                     text: messageText,
-                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                    timestamp: Date.now() // 使用客户端时间戳
                 });
                 messageInput.value = '';
             }
-        }
+        };
 
-        // 动态添加消息到页面
+        // 添加消息到页面
         function addMessageToPage(text, timestamp) {
             const messagesList = document.getElementById('messages');
             const messageItem = document.createElement('li');
             
-            // 格式化时间戳
+            // 格式化时间
             const date = new Date(timestamp);
-            const timeString = date.toLocaleTimeString('zh-CN');
+            const timeString = date.toLocaleTimeString('zh-CN', { 
+                hour: '2-digit', 
+                minute: '2-digit'
+            });
             
             messageItem.textContent = `[${timeString}] ${text}`;
             messagesList.appendChild(messageItem);
@@ -61,6 +116,11 @@
             // 自动滚动到底部
             messagesList.scrollTop = messagesList.scrollHeight;
         }
+
+        // 首次加载历史消息
+        window.addEventListener('DOMContentLoaded', () => {
+            messagesList.scrollTop = messagesList.scrollHeight;
+        });
     </script>
 </body>
 </html>
