@@ -1,0 +1,65 @@
+/* 全局样式 */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f0f0;
+}
+
+/* 消息列表 */
+#messages {
+    list-style-type: none;
+    padding: 10px;
+    max-height: 300px; /* 限制高度，添加滚动条 */
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+/* 单条消息 */
+#messages li {
+    padding: 8px;
+    margin-bottom: 10px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+}
+
+/* 时间戳 */
+.timestamp {
+    font-size: 12px;
+    color: gray;
+    margin-left: 10px;
+}
+
+/* 输入框和按钮 */
+#chatbox {
+    display: flex;
+    margin-top: 20px;
+}
+
+#chatbox input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+#chatbox button {
+    padding: 10px 20px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #28a745;
+    color: white;
+    cursor: pointer;
+}
+
+#chatbox button:hover {
+    background-color: #218838;
+}
